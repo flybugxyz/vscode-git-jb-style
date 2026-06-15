@@ -188,8 +188,15 @@ export class GitOpsService {
     
     let originalBranch = '';
     let originalHead = '';
+    let stashed = false;
     
     try {
+      const clean = await this.isWorkingTreeClean();
+      if (!clean) {
+        await git.raw(['stash', 'push', '-m', 'Auto-stash before squash']);
+        stashed = true;
+      }
+
       const branchInfo = await git.branch();
       originalBranch = branchInfo.current;
       originalHead = (await git.revparse(['HEAD'])).trim();
@@ -267,6 +274,14 @@ export class GitOpsService {
       }
       vscode.window.showErrorMessage(`Squash commits failed: ${err.message || err}`);
       return false;
+    } finally {
+      if (stashed) {
+        try {
+          await git.raw(['stash', 'pop']);
+        } catch (stashErr) {
+          vscode.window.showWarningMessage('Auto-stash pop resulted in conflicts. Please resolve them in your working directory.');
+        }
+      }
     }
   }
 
@@ -293,11 +308,13 @@ export class GitOpsService {
 
     let originalBranch = '';
     let originalHead = '';
+    let stashed = false;
 
     try {
       const clean = await this.isWorkingTreeClean();
       if (!clean) {
-        throw new Error('Your working tree has unstaged or staged changes. Please commit or stash them first.');
+        await git.raw(['stash', 'push', '-m', 'Auto-stash before reword']);
+        stashed = true;
       }
 
       const branchInfo = await git.branch();
@@ -367,6 +384,14 @@ export class GitOpsService {
       }
       vscode.window.showErrorMessage(`Edit commit message failed: ${err.message || err}`);
       return false;
+    } finally {
+      if (stashed) {
+        try {
+          await git.raw(['stash', 'pop']);
+        } catch (stashErr) {
+          vscode.window.showWarningMessage('Auto-stash pop resulted in conflicts. Please resolve them in your working directory.');
+        }
+      }
     }
   }
 
