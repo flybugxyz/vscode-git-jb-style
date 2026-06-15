@@ -85,6 +85,7 @@ export interface GitData {
   changelists?: Changelist[];
   localHistoryEnabled?: boolean;
   activeRepo?: string;
+  isRebasing?: boolean;
 }
 
 export const FILTER_ALL = 'ALL';

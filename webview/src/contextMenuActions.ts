@@ -18,6 +18,7 @@ export interface MenuActionCallbacks {
   selectedIndices: number[];
   onRewordCommit?: (hash: string, currentMessage: string) => void;
   onSquashCommits?: (hashes: string[]) => void;
+  setInteractiveRebaseBase?: (commit: Commit) => void;
 }
 
 /**
@@ -177,6 +178,11 @@ function dispatchCommitAction(
     case 'viewDiff':
       cb.postMessage({ type: 'viewDiff', hash: commit.hash });
       break;
+    case 'interactiveRebase':
+      if (cb.setInteractiveRebaseBase) {
+         cb.setInteractiveRebaseBase(commit);
+      }
+      break;
   }
 }
 
@@ -272,6 +278,7 @@ export function getCommitMenuItems(
     { label: 'Squash Commits...', icon: 'arrow-both', action: 'squashCommits', disabled: !canSquash },
     { label: 'Edit Commit Message...', icon: 'edit', action: 'rewordCommit', disabled: isMulti },
     { label: 'Revert Commit', icon: 'discard', action: 'revertCommit', danger: true, disabled: isMulti },
+    { label: 'Interactive Rebase from Here...', icon: 'edit', action: 'interactiveRebase', disabled: isMulti },
     { label: 'Rebase Current Branch onto This', icon: 'sync', action: 'rebaseRef', disabled: isMulti },
     { label: 'Merge into Current Branch...', icon: 'merge', action: 'mergeRef', disabled: isMulti },
     { type: 'separator' },

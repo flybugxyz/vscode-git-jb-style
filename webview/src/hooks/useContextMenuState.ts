@@ -16,7 +16,8 @@ export function useContextMenuState(selection: UseCommitSelectionReturn) {
     setFilesExpanded, 
     setDetailsExpanded, 
     setPinnedBranches, 
-    setFilterBranch 
+    setFilterBranch,
+    setInteractiveRebaseBase
   } = useGitData();
 
   const handleFilter = useCallback((branch: string) => {
@@ -61,13 +62,14 @@ export function useContextMenuState(selection: UseCommitSelectionReturn) {
         const messages = selectedCommits.map(c => c?.message || '').filter(Boolean);
         const defaultMessage = messages.join('\n\n');
         setSquashModal({ hashes, defaultMessage });
-      }
+      },
+      setInteractiveRebaseBase
     });
     setMenuState(null);
   }, [
     menuState, vscode, selection, setActiveTab, 
     setFilesExpanded, setDetailsExpanded, setPinnedBranches, 
-    handleFilter, gitData
+    handleFilter, gitData, setInteractiveRebaseBase
   ]);
 
   return {

@@ -127,6 +127,30 @@ export async function handleCommitMessage(
       provider.refresh();
       return true;
 
+    case 'interactiveRebase': {
+      const success = await gitService.interactiveRebase(data.base, data.actions);
+      if (success) {
+        provider.refresh();
+      }
+      return true;
+    }
+
+    case 'continueRebase': {
+      const success = await gitService.continueRebase();
+      if (success) {
+        provider.refresh();
+      }
+      return true;
+    }
+
+    case 'abortRebase': {
+      const success = await gitService.abortRebase();
+      if (success) {
+        provider.refresh();
+      }
+      return true;
+    }
+
     case 'copySHA':
       await vscode.env.clipboard.writeText(data.hash);
       vscode.window.showInformationMessage('SHA copied to clipboard');

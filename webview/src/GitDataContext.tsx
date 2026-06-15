@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { GitData, FILTER_ALL } from './types';
+import { GitData, FILTER_ALL, Commit } from './types';
 
 // The singleton vsCodeApi
 declare const acquireVsCodeApi: any;
@@ -21,6 +21,9 @@ export interface IGitDataContext {
   
   isCompareMode: boolean;
   setIsCompareMode: React.Dispatch<React.SetStateAction<boolean>>;
+
+  interactiveRebaseBase: Commit | null;
+  setInteractiveRebaseBase: React.Dispatch<React.SetStateAction<Commit | null>>;
 
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
@@ -57,6 +60,7 @@ export function GitDataProvider({ children }: { children: ReactNode }) {
   const [checkedFiles, setCheckedFiles] = useState<Set<string>>(new Set());
   const [selectedCommitFiles, setSelectedCommitFiles] = useState<{ hash: string; files: { status: string; path: string }[] } | null>(null);
   const [isCompareMode, setIsCompareMode] = useState(false);
+  const [interactiveRebaseBase, setInteractiveRebaseBase] = useState<Commit | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [fileFilter, setFileFilter] = useState('');
   const [filterBranch, setFilterBranch] = useState(FILTER_ALL);
@@ -75,6 +79,7 @@ export function GitDataProvider({ children }: { children: ReactNode }) {
     checkedFiles, setCheckedFiles,
     selectedCommitFiles, setSelectedCommitFiles,
     isCompareMode, setIsCompareMode,
+    interactiveRebaseBase, setInteractiveRebaseBase,
     searchQuery, setSearchQuery,
     fileFilter, setFileFilter,
     filterBranch, setFilterBranch,

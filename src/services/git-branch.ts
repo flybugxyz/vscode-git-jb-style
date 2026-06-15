@@ -77,6 +77,33 @@ export class GitBranchService {
     }
   }
 
+  public async predictConflicts(targetRef: string): Promise<string[]> {
+    const git = this.core.git;
+    if (!git) return [];
+    try {
+      // merge-tree --write-tree computes the merge in memory. 
+      // If successful (no conflicts), exit code is 0.
+      await git.raw(['merge-tree', '--write-tree', 'HEAD', targetRef]);
+      return [];
+    } catch (err: any) {
+      // If there are conflicts, exit code is non-zero (usually 1).
+      // The output containing the conflict details is inside the error message.
+      const output = typeof err === 'string' ? err : (err.message || '');
+      const conflictFiles = new Set<string>();
+      
+      const lines = output.split('\n');
+      for (const line of lines) {
+        if (line.includes('CONFLICT') && line.includes('in ')) {
+          const match = line.match(/in (.+)$/);
+          if (match && match[1]) {
+            conflictFiles.add(match[1].trim());
+          }
+        }
+      }
+      return Array.from(conflictFiles);
+    }
+  }
+
   public async createBranchFrom(newName: string, startPoint: string) {
     const git = this.core.git;
     if (!git) return;

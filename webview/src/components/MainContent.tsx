@@ -227,6 +227,24 @@ export function MainContent({
         </div>
       </div>
 
+      {gitData?.isRebasing && (
+        <div style={{ 
+          backgroundColor: 'var(--vscode-statusBarItem-warningBackground)', 
+          color: 'var(--vscode-statusBarItem-warningForeground)', 
+          padding: '4px 12px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '12px',
+          borderBottom: '1px solid var(--vscode-widget-border)'
+        }}>
+          <span className="codicon codicon-warning"></span>
+          <span>Rebase in progress. Resolve conflicts in Local Changes, then continue.</span>
+          <div style={{ flex: 1 }}></div>
+          <button className="vscode-button" onClick={() => vscode.postMessage({ type: 'continueRebase' })} style={{ height: '24px', padding: '0 8px' }}>Continue Rebase</button>
+          <button className="vscode-button secondary" onClick={() => vscode.postMessage({ type: 'abortRebase' })} style={{ height: '24px', padding: '0 8px' }}>Abort Rebase</button>
+        </div>
+      )}
+
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }} className="main-content">
         <div style={{ display: activeTab === 'log' ? 'flex' : 'none', flex: 1, minWidth: 0, height: '100%', overflow: 'hidden' }}>
           <LogTab

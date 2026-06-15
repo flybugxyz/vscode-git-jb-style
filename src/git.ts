@@ -107,6 +107,10 @@ export class GitService {
     return this._branch.merge(hash);
   }
 
+  public predictConflicts(targetRef: string): Promise<string[]> {
+    return this._branch.predictConflicts(targetRef);
+  }
+
   public createBranchFrom(newName: string, startPoint: string) {
     return this._branch.createBranchFrom(newName, startPoint);
   }
@@ -266,6 +270,18 @@ export class GitService {
 
   public squashCommits(hashes: string[], commitMessage: string): Promise<boolean> {
     return this._ops.squashCommits(hashes, commitMessage);
+  }
+
+  public interactiveRebase(base: string, actions: { action: string, hash: string, message?: string }[]): Promise<boolean> {
+    return this._ops.interactiveRebase(base, actions);
+  }
+
+  public continueRebase(): Promise<boolean> {
+    return this._ops.continueRebase();
+  }
+
+  public abortRebase(): Promise<boolean> {
+    return this._ops.abortRebase();
   }
 
   public isWorkingTreeClean(): Promise<boolean> {

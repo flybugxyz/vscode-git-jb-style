@@ -1,6 +1,8 @@
 import { GitCoreService } from './git-core';
 import { validateFilePath, validateHash, validateBranchName } from '../git-validation';
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class GitOpsService {
   constructor(private core: GitCoreService) {}
@@ -409,5 +411,165 @@ export class GitOpsService {
       }
     }
     return messages;
+  }
+
+  public async continueRebase(): Promise<boolean> {
+    const git = this.core.git;
+    if (!git || !this.core.activeRepoPath) return false;
+    
+    const gitDir = path.join(this.core.activeRepoPath, '.git');
+    const editorScriptPath = path.join(gitDir, 'git-constellation-seq-editor.js');
+    const msgEditorScriptPath = path.join(gitDir, 'git-constellation-msg-editor.js');
+    const jsonPath = path.join(gitDir, 'git-constellation-rebase.json');
+    
+    try {
+      const nodeExe = process.execPath;
+      const env = {
+        ...process.env,
+        ELECTRON_RUN_AS_NODE: '1',
+        GIT_SEQUENCE_EDITOR: '"' + nodeExe + '" "' + editorScriptPath + '"',
+        GIT_EDITOR: '"' + nodeExe + '" "' + msgEditorScriptPath + '"',
+        GIT_CONSTELLATION_REBASE_JSON: jsonPath
+      };
+
+      git.env(env as any);
+      await git.raw(['rebase', '--continue']);
+      vscode.window.showInformationMessage('Rebase continued successfully.');
+      return true;
+    } catch (err: any) {
+      console.error('Continue rebase error:', err);
+      const rebaseMergeExists = fs.existsSync(path.join(gitDir, 'rebase-merge')) || fs.existsSync(path.join(gitDir, 'rebase-apply'));
+      if (rebaseMergeExists) {
+        vscode.window.showWarningMessage('Rebase is still paused. Resolve conflicts or edits before continuing.');
+        return false;
+      } else {
+        vscode.window.showErrorMessage('Rebase failed: ' + (err.message || err));
+        return false;
+      }
+    } finally {
+      git.env(process.env as any);
+      const rebaseMergeExists = fs.existsSync(path.join(gitDir, 'rebase-merge')) || fs.existsSync(path.join(gitDir, 'rebase-apply'));
+      if (!rebaseMergeExists) {
+        if (fs.existsSync(editorScriptPath)) fs.unlinkSync(editorScriptPath);
+        if (fs.existsSync(jsonPath)) fs.unlinkSync(jsonPath);
+        if (fs.existsSync(msgEditorScriptPath)) fs.unlinkSync(msgEditorScriptPath);
+        if (fs.existsSync(jsonPath + '.state')) fs.unlinkSync(jsonPath + '.state');
+      }
+    }
+  }
+
+  public async abortRebase(): Promise<boolean> {
+    const git = this.core.git;
+    if (!git || !this.core.activeRepoPath) return false;
+    try {
+      await git.raw(['rebase', '--abort']);
+      vscode.window.showInformationMessage('Rebase aborted.');
+      return true;
+    } catch (err: any) {
+      vscode.window.showErrorMessage('Failed to abort rebase: ' + (err.message || err));
+      return false;
+    } finally {
+      const gitDir = path.join(this.core.activeRepoPath, '.git');
+      const editorScriptPath = path.join(gitDir, 'git-constellation-seq-editor.js');
+      const msgEditorScriptPath = path.join(gitDir, 'git-constellation-msg-editor.js');
+      const jsonPath = path.join(gitDir, 'git-constellation-rebase.json');
+      if (fs.existsSync(editorScriptPath)) fs.unlinkSync(editorScriptPath);
+      if (fs.existsSync(jsonPath)) fs.unlinkSync(jsonPath);
+      if (fs.existsSync(msgEditorScriptPath)) fs.unlinkSync(msgEditorScriptPath);
+      if (fs.existsSync(jsonPath + '.state')) fs.unlinkSync(jsonPath + '.state');
+    }
+  }
+
+  public async interactiveRebase(base: string, actions: { action: string, hash: string, message?: string }[]): Promise<boolean> {
+    const git = this.core.git;
+    if (!git || !this.core.activeRepoPath) return false;
+    validateHash(base);
+    
+    const gitDir = path.join(this.core.activeRepoPath, '.git');
+    const editorScriptPath = path.join(gitDir, 'git-constellation-seq-editor.js');
+    const jsonPath = path.join(gitDir, 'git-constellation-rebase.json');
+    
+    const editorScript = [
+      "const fs = require('fs');",
+      "const jsonFile = process.env.GIT_CONSTELLATION_REBASE_JSON;",
+      "const todoFile = process.argv[2];",
+      "if (!jsonFile || !todoFile) { process.exit(1); }",
+      "try {",
+      "  const actionsStr = fs.readFileSync(jsonFile, 'utf8');",
+      "  const actions = JSON.parse(actionsStr);",
+      "  let newTodoContent = '';",
+      "  for (const item of actions) {",
+      "    if (['pick', 'reword', 'edit', 'squash', 'fixup', 'drop'].includes(item.action)) {",
+      "      newTodoContent += item.action + ' ' + item.hash + '\\n';",
+      "    }",
+      "  }",
+      "  fs.writeFileSync(todoFile, newTodoContent, 'utf8');",
+      "  process.exit(0);",
+      "} catch (e) { process.exit(1); }"
+    ].join('\\n');
+
+    const msgEditorScriptPath = path.join(gitDir, 'git-constellation-msg-editor.js');
+    const msgEditorScript = [
+      "const fs = require('fs');",
+      "const jsonFile = process.env.GIT_CONSTELLATION_REBASE_JSON;",
+      "const commitMsgFile = process.argv[2];",
+      "try {",
+      "  const actionsStr = fs.readFileSync(jsonFile, 'utf8');",
+      "  const actions = JSON.parse(actionsStr);",
+      "  const stateFile = jsonFile + '.state';",
+      "  let currentIndex = 0;",
+      "  if (fs.existsSync(stateFile)) { currentIndex = parseInt(fs.readFileSync(stateFile, 'utf8'), 10); }",
+      "  let editAction = null;",
+      "  for (let i = currentIndex; i < actions.length; i++) {",
+      "    if (actions[i].action === 'reword' || actions[i].action === 'squash') {",
+      "      editAction = actions[i];",
+      "      currentIndex = i + 1;",
+      "      break;",
+      "    }",
+      "  }",
+      "  if (editAction && editAction.message) { fs.writeFileSync(commitMsgFile, editAction.message, 'utf8'); }",
+      "  fs.writeFileSync(stateFile, currentIndex.toString(), 'utf8');",
+      "  process.exit(0);",
+      "} catch (e) { process.exit(1); }"
+    ].join('\\n');
+
+    try {
+      fs.writeFileSync(editorScriptPath, editorScript, 'utf8');
+      fs.writeFileSync(jsonPath, JSON.stringify(actions), 'utf8');
+      fs.writeFileSync(msgEditorScriptPath, msgEditorScript, 'utf8');
+
+      const nodeExe = process.execPath;
+      
+      const env = {
+        ...process.env,
+        ELECTRON_RUN_AS_NODE: '1',
+        GIT_SEQUENCE_EDITOR: '"' + nodeExe + '" "' + editorScriptPath + '"',
+        GIT_EDITOR: '"' + nodeExe + '" "' + msgEditorScriptPath + '"',
+        GIT_CONSTELLATION_REBASE_JSON: jsonPath
+      };
+
+      // Set environment variables for the git process
+      git.env(env as any);
+      await git.raw(['rebase', '-i', base]);
+      vscode.window.showInformationMessage('Interactive rebase completed successfully.');
+      return true;
+    } catch (err: any) {
+      console.error('Interactive rebase error:', err);
+      const rebaseMergeExists = fs.existsSync(path.join(gitDir, 'rebase-merge')) || fs.existsSync(path.join(gitDir, 'rebase-apply'));
+      if (rebaseMergeExists) {
+        vscode.window.showWarningMessage('Interactive rebase paused (likely due to conflicts or an edit request). Please resolve them in the working directory.');
+        return false;
+      } else {
+        vscode.window.showErrorMessage('Interactive rebase failed: ' + (err.message || err));
+        return false;
+      }
+    } finally {
+      if (fs.existsSync(editorScriptPath)) fs.unlinkSync(editorScriptPath);
+      if (fs.existsSync(jsonPath)) fs.unlinkSync(jsonPath);
+      if (fs.existsSync(msgEditorScriptPath)) fs.unlinkSync(msgEditorScriptPath);
+      if (fs.existsSync(jsonPath + '.state')) fs.unlinkSync(jsonPath + '.state');
+      
+      git.env(process.env as any);
+    }
   }
 }

@@ -125,15 +125,39 @@ export async function handleBranchMessage(
       return true;
     }
 
-    case 'rebaseRef':
+    case 'rebaseRef': {
+      const conflicts = await gitService.predictConflicts(data.ref);
+      if (conflicts.length > 0) {
+        const confirm = await vscode.window.showWarningMessage(
+          `Prediction: Rebasing will likely result in conflicts in ${conflicts.length} files.\n\nConflicted files:\n${conflicts.slice(0, 5).join('\n')}${conflicts.length > 5 ? '\n...' : ''}\n\nAre you sure you want to proceed and resolve them manually?`,
+          { modal: true },
+          'Continue Rebase'
+        );
+        if (confirm !== 'Continue Rebase') {
+          return true;
+        }
+      }
       await gitService.rebase(data.ref);
       provider.refresh();
       return true;
+    }
 
-    case 'mergeRef':
+    case 'mergeRef': {
+      const conflicts = await gitService.predictConflicts(data.ref);
+      if (conflicts.length > 0) {
+        const confirm = await vscode.window.showWarningMessage(
+          `Prediction: Merging will result in conflicts in ${conflicts.length} files.\n\nConflicted files:\n${conflicts.slice(0, 5).join('\n')}${conflicts.length > 5 ? '\n...' : ''}\n\nAre you sure you want to proceed and resolve them manually?`,
+          { modal: true },
+          'Continue Merge'
+        );
+        if (confirm !== 'Continue Merge') {
+          return true;
+        }
+      }
       await gitService.merge(data.ref);
       provider.refresh();
       return true;
+    }
 
     case 'compareRef': {
       const compareFiles = await gitService.getCompareFiles(data.ref);

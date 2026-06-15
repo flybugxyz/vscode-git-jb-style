@@ -380,6 +380,12 @@ class GitJBViewProvider implements vscode.WebviewViewProvider {
           this._gitService.getRepositories()
         ]);
 
+        let isRebasing = false;
+        if (this._gitService.activeRepoPath) {
+          const gitDir = path.join(this._gitService.activeRepoPath, '.git');
+          isRebasing = fs.existsSync(path.join(gitDir, 'rebase-merge')) || fs.existsSync(path.join(gitDir, 'rebase-apply'));
+        }
+
         const currentModifiedPaths = new Set(status?.files?.map(f => f.path) || []);
         let changelists = this.context.workspaceState.get<any[]>('changelists') || [];
 
@@ -426,7 +432,8 @@ class GitJBViewProvider implements vscode.WebviewViewProvider {
             changelists,
             localHistoryEnabled: vscode.workspace.getConfiguration('git-constellation.localHistory').get<boolean>('enabled', false),
             activeRepo: this._gitService.activeRepoPath,
-            selectTab: this._pendingTabSelection
+            selectTab: this._pendingTabSelection,
+            isRebasing
           }
         });
         this._pendingTabSelection = undefined;
