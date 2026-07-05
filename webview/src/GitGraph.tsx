@@ -77,7 +77,7 @@ export const GitGraph: React.FC<GraphProps> = ({ commits, rowHeight, onWidthChan
           ctx.fillStyle = COLORS[0];
           ctx.arc(xOffset, y, 4, 0, Math.PI * 2);
           ctx.fill();
-          
+
           ctx.beginPath();
           ctx.strokeStyle = bgColor;
           ctx.lineWidth = 1;
@@ -132,10 +132,10 @@ export const GitGraph: React.FC<GraphProps> = ({ commits, rowHeight, onWidthChan
 
     const laneWidth = 12;
     const xOffset = 10;
-    
+
     // Calculate required width based on actual max lanes used
     const displayWidth = Math.max(40, (maxLanesCount) * laneWidth + xOffset + 10);
-    
+
     // Notify parent of the calculated width
     if (onWidthChange) {
       onWidthChange(displayWidth);
@@ -154,7 +154,7 @@ export const GitGraph: React.FC<GraphProps> = ({ commits, rowHeight, onWidthChan
       canvas.height = displayHeight * dpr;
       canvas.style.width = `${displayWidth}px`;
       canvas.style.height = `${displayHeight}px`;
-      
+
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, displayWidth, displayHeight);
 
@@ -178,7 +178,7 @@ export const GitGraph: React.FC<GraphProps> = ({ commits, rowHeight, onWidthChan
 
             const minY = Math.min(y, targetY) - rowHeight;
             const maxY = Math.max(y, targetY) + rowHeight;
-            
+
             if (maxY >= chunkTopY && minY <= chunkBottomY) {
               ctx.beginPath();
               ctx.strokeStyle = COLORS[commitLanes[i] % COLORS.length];
@@ -217,7 +217,7 @@ export const GitGraph: React.FC<GraphProps> = ({ commits, rowHeight, onWidthChan
         ctx.fillStyle = COLORS[commitLanes[i] % COLORS.length];
         ctx.arc(x, y, 4, 0, Math.PI * 2);
         ctx.fill();
-        
+
         ctx.beginPath();
         ctx.strokeStyle = bgColor;
         ctx.lineWidth = 1;
@@ -234,9 +234,9 @@ export const GitGraph: React.FC<GraphProps> = ({ commits, rowHeight, onWidthChan
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {Array.from({ length: chunksCount }).map((_, i) => (
-        <canvas 
+        <canvas
           key={i}
-          ref={el => { canvasRefs.current[i] = el; }} 
+          ref={el => { canvasRefs.current[i] = el; }}
           style={{ verticalAlign: 'top', display: 'block' }}
         />
       ))}

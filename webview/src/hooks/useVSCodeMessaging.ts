@@ -34,7 +34,7 @@ export function useVSCodeMessaging(callbacks: {
           setIsFetchingMore(false);
           setIsFetching(false);
           callbacks.onStopLoadingState?.();
-          
+
           if (payload.fileFilter !== undefined) {
             setFileFilter(payload.fileFilter);
           }
@@ -85,8 +85,8 @@ export function useVSCodeMessaging(callbacks: {
             callbacks.onCommitMessageGenerated(message.message);
           }
           if (message.error && callbacks.onCommitMessageGenerated) {
-             // Handle error if needed, or pass empty. But UI can clear generating state.
-             callbacks.onCommitMessageGenerated(message.message || '');
+            // Handle error if needed, or pass empty. But UI can clear generating state.
+            callbacks.onCommitMessageGenerated(message.message || '');
           }
           break;
         }

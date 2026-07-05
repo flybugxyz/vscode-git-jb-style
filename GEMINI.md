@@ -48,23 +48,13 @@ A VS Code extension mimicking the JetBrains Git UI experience. Located in the `v
 ### 5. Context Menus & Git Operations
 - **Trigger**: Right-clicking a commit row, branch (dropdown list / pills), or tag pill triggers custom context menus positioned to respect viewport boundaries.
 - **Implementation**: Handled by a unified `<ContextMenu />` component in `ContextMenu.tsx`. It provides standard styling, keyboard navigation, submenus (e.g. for Copying), danger states, and dynamic enabling/disabling of options.
-- **Commit Menu**: Copy SHA/short SHA/message/URL, create branch/tag/worktree, cherry-pick (supports multiple commits), squash commits (combines selected contiguous commits on the current branch with same-branch validation), edit commit message (amends HEAD or rewrites history using temp branch and cherry-picks for older commits), revert, interactive rebase, rebase, merge, compare, inspect details, open browser, view diff.
+- **Commit Menu**: Copy SHA/short SHA/message/URL, create branch/tag/worktree, cherry-pick (supports multiple commits), squash commits (combines selected contiguous commits on the current branch with same-branch validation), edit commit message (amends HEAD or rewrites history using temp branch and cherry-picks for older commits), revert, rebase, merge, compare, inspect details, open browser, view diff.
 - **Branch Menu**: Checkout, new branch, merge, rebase, pull, push, push to remote, rename, delete (local/remote), compare, pin/unpin, open in browser, set upstream. Pinned branches are displayed at the very top of the branch filter popup. The branch filter popup allows searching/filtering the list dynamically by local branches, remote branches, and tags.
 - **Tag Menu**: View tag details (registers custom content provider `git-constellation-tag` scheme), create branch, compare, delete (local/remote), copy tag name, open in browser.
 - **Stash Menu**: Apply stash, pop stash, drop stash, copy message, copy hash.
 - **Compare Mode**: Diff status between branches/tags or HEAD vs commit. Renders file differences list in the side pane with a banner to exit.
 - **View Diff**: Registers a custom text content provider `git-constellation-diff` scheme returning full git diffs.
 - **VS Code Context Menus**: Right-clicking a file in the VS Code file explorer or editor context menu displays a "View File History (GitConstellation)" option, which automatically focuses the extension panel, filters the commit list to show the file's git history, and switches the active tab to the Log page if it isn't already selected.
-
-### 5.5. Interactive Rebase
-- **Integration**: Accessed via right-clicking a commit and selecting "Interactive Rebase from Here...".
-- **Backend (`git-ops.ts`)**: Uses custom Node.js scripts injected via `GIT_SEQUENCE_EDITOR` and `GIT_EDITOR` environment variables to automatically feed actions (pick, reword, edit, squash, drop) to `simple-git` without blocking the process or opening external editors.
-- **Frontend (`InteractiveRebaseModal.tsx`)**: Provides a native HTML5 drag-and-drop interface for reordering commits, action dropdowns, and inline textareas for message editing (for `reword` and `squash` actions).
-- **Lifecycle Management**: Detects active rebasing by checking for `.git/rebase-merge` directory and displays an active "Rebase in progress" banner in the UI with 'Continue Rebase' and 'Abort Rebase' controls.
-
-### 5.6. Conflict Prediction
-- **Detection**: Performs in-memory conflict detection using `git merge-tree --write-tree HEAD <targetRef>`.
-- **Pre-flight Warnings**: Hooked into standard "Merge" and "Rebase" actions to warn users with an alert modal of impending conflicts *before* touching the working tree.
 
 ### 6. Commit List Table
 - **Layout**: Uses `table-layout: fixed` for stable column dimensions.
@@ -152,7 +142,6 @@ A VS Code extension mimicking the JetBrains Git UI experience. Located in the `v
   - `ErrorBoundary.tsx`: React global error fallback boundary UI component.
   - `Sidebar.tsx`: Left-aligned repository and branch/tag filter navigator.
   - `LogTab.tsx`: Main commit log table view with canvas graph and details side pane.
-  - `InteractiveRebaseModal.tsx`: Native HTML5 drag-and-drop modal for configuring interactive rebases.
   - `LocalChangesTab.tsx`: File tree of changed files with selective staging checkboxes.
   - `StashTab.tsx`: List of stashes, stash forms, and stashed file difference inspectors.
   - `WorktreeTab.tsx`: Grid showing git worktrees with management action links.

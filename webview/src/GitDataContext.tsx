@@ -9,16 +9,16 @@ export interface IGitDataContext {
   vscode: any;
   gitData: GitData | null;
   setGitData: React.Dispatch<React.SetStateAction<GitData | null>>;
-  
+
   activeTab: 'log' | 'local' | 'stashes' | 'worktrees' | 'history';
   setActiveTab: React.Dispatch<React.SetStateAction<'log' | 'local' | 'stashes' | 'worktrees' | 'history'>>;
-  
+
   checkedFiles: Set<string>;
   setCheckedFiles: React.Dispatch<React.SetStateAction<Set<string>>>;
-  
+
   selectedCommitFiles: { hash: string; files: { status: string; path: string }[] } | null;
   setSelectedCommitFiles: React.Dispatch<React.SetStateAction<{ hash: string; files: { status: string; path: string }[] } | null>>;
-  
+
   isCompareMode: boolean;
   setIsCompareMode: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -27,13 +27,13 @@ export interface IGitDataContext {
 
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  
+
   fileFilter: string;
   setFileFilter: React.Dispatch<React.SetStateAction<string>>;
-  
+
   filterBranch: string;
   setFilterBranch: React.Dispatch<React.SetStateAction<string>>;
-  
+
   filterAuthor: string;
   setFilterAuthor: React.Dispatch<React.SetStateAction<string>>;
 
@@ -43,7 +43,7 @@ export interface IGitDataContext {
   setIsFetchingMore: React.Dispatch<React.SetStateAction<boolean>>;
   hasMoreCommits: boolean;
   setHasMoreCommits: React.Dispatch<React.SetStateAction<boolean>>;
-  
+
   filesExpanded: boolean;
   setFilesExpanded: React.Dispatch<React.SetStateAction<boolean>>;
   detailsExpanded: boolean;

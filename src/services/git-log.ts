@@ -3,7 +3,7 @@ import { validateBranchName, validateFilePath } from '../git-validation';
 const FILTER_ALL = 'ALL';
 
 export class GitLogService {
-  constructor(private core: GitCoreService) {}
+  constructor(private core: GitCoreService) { }
 
   public async getLog(
     branch: string = FILTER_ALL,
@@ -20,7 +20,7 @@ export class GitLogService {
     }
     try {
       console.log(`GitLogService: Fetching log with parents for branch/filter: ${branch}...`);
-      
+
       if (branch !== FILTER_ALL && branch !== 'HEAD' && branch !== '') {
         validateBranchName(branch);
       }
@@ -103,7 +103,7 @@ export class GitLogService {
       } else {
         args.push('--all');
       }
-      
+
       if (author && author !== FILTER_ALL) {
         args.push(`--author=${author}`);
       }
@@ -111,7 +111,7 @@ export class GitLogService {
       if (search) {
         args.push(`--grep=${search}`, '-i');
       }
-      
+
       args.push(formatStr);
 
       if (filePath) {

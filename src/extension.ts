@@ -235,20 +235,20 @@ class GitJBViewProvider implements vscode.WebviewViewProvider {
           case 'refresh':
             this.refresh();
             if (this._pendingLocalHistorySearch) {
-              webviewView.webview.postMessage({ 
-                type: 'searchLocalHistoryForFile', 
-                filePath: this._pendingLocalHistorySearch 
+              webviewView.webview.postMessage({
+                type: 'searchLocalHistoryForFile',
+                filePath: this._pendingLocalHistorySearch
               });
               this._pendingLocalHistorySearch = undefined;
             }
             break;
           case 'searchLocalHistory': {
             const result = await this._localHistoryService.search(data.query, this._gitService.activeRepoPath);
-            webviewView.webview.postMessage({ 
-              type: 'searchLocalHistoryResult', 
-              results: result.results, 
-              message: result.message, 
-              error: result.error 
+            webviewView.webview.postMessage({
+              type: 'searchLocalHistoryResult',
+              results: result.results,
+              message: result.message,
+              error: result.error
             });
             break;
           }
