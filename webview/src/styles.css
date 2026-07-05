@@ -203,11 +203,27 @@ input[type="checkbox"] {
 }
 
 .side-pane {
-  width: 300px;
   border-left: var(--jb-border);
   background-color: var(--vscode-sideBar-background);
   display: flex;
   flex-direction: column;
+}
+
+.resize-handle-left {
+  position: absolute;
+  top: 0;
+  left: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 100;
+  user-select: none;
+  background-color: transparent;
+  transition: background-color 0.1s;
+}
+
+.resize-handle-left:hover {
+  background-color: var(--vscode-sash-hoverBorder, var(--vscode-focusBorder, #007acc));
 }
 
 .side-pane-title-bar {
@@ -236,8 +252,12 @@ input[type="checkbox"] {
 
 .file-tree-wrapper {
   flex: 1;
-  overflow-y: auto;
+  overflow: auto;
   border-bottom: var(--jb-border);
+}
+
+.file-tree {
+  min-width: max-content;
 }
 
 .commit-details {
@@ -329,8 +349,7 @@ input[type="checkbox"] {
 
 .tree-name {
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .status-added { color: #50fa7b; }
@@ -742,14 +761,22 @@ body.resizing-row * {
   font-size: 11px;
   margin-left: 8px;
   max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .file-filter-badge .codicon {
   font-size: 10px;
+  flex-shrink: 0;
 }
+
+.file-filter-badge-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+
 
 .file-filter-badge-close {
   cursor: pointer;
@@ -757,6 +784,7 @@ body.resizing-row * {
   margin-left: 2px;
   opacity: 0.8;
   transition: opacity 0.1s;
+  flex-shrink: 0;
 }
 
 .file-filter-badge-close:hover {

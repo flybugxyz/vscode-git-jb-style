@@ -107,9 +107,9 @@ export function LogTab({
 
   const handleFileClick = (path: string) => {
     if (selectedCommitFiles) {
-      vscode.postMessage({ 
-        type: 'openDiff', 
-        hash: selectedCommitFiles.hash, 
+      vscode.postMessage({
+        type: 'openDiff',
+        hash: selectedCommitFiles.hash,
         path,
         isCompare: isCompareMode
       });
@@ -160,7 +160,7 @@ export function LogTab({
               }}
             />
             {searchQuery && (
-              <span 
+              <span
                 style={{ cursor: 'pointer', fontSize: '12px', opacity: 0.7, padding: '0 4px' }}
                 title="Clear Search"
                 onClick={() => {
@@ -173,13 +173,13 @@ export function LogTab({
             )}
 
             {fileFilter && (
-              <div 
+              <div
                 className="file-filter-badge"
                 title={`Filtering history by file: ${fileFilter}`}
               >
                 <span className="codicon codicon-file"></span>
-                <span>{fileFilter.split('/').pop()}</span>
-                <span 
+                <span className="file-filter-badge-name">{fileFilter.split('/').pop()}</span>
+                <span
                   className="file-filter-badge-close"
                   onClick={() => {
                     setFileFilter('');
@@ -194,32 +194,32 @@ export function LogTab({
           </div>
 
           <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button 
-              className="toolbar-button" 
+            <button
+              className="toolbar-button"
               title="Refresh / Fetch Remote"
               onClick={() => { setIsFetching(true); vscode.postMessage({ type: 'fetch' }); }}
               disabled={isFetching}
             >
               <span className={`codicon ${isFetching ? 'codicon-loading codicon-modifier-spin' : 'codicon-refresh'}`}></span>
             </button>
-            <button 
-              className="toolbar-button" 
+            <button
+              className="toolbar-button"
               title="Pull"
               onClick={() => { setIsPulling(true); vscode.postMessage({ type: 'pull' }); }}
               disabled={isPulling}
             >
               <span className={`codicon ${isPulling ? 'codicon-loading codicon-modifier-spin' : 'codicon-cloud-download'}`}></span>
             </button>
-            <button 
-              className="toolbar-button" 
+            <button
+              className="toolbar-button"
               title="Push"
               onClick={() => { setIsPushing(true); vscode.postMessage({ type: 'push' }); }}
               disabled={isPushing}
             >
               <span className={`codicon ${isPushing ? 'codicon-loading codicon-modifier-spin' : 'codicon-cloud-upload'}`}></span>
             </button>
-            <button 
-              className="toolbar-button" 
+            <button
+              className="toolbar-button"
               title={selection.selectedIndices.length > 1 ? `Cherry-pick ${selection.selectedIndices.length} selected commits` : "Cherry-pick selected commit"}
               disabled={selection.selectedIndices.length === 0}
               onClick={() => {
@@ -232,23 +232,23 @@ export function LogTab({
                 }
               }}
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="16" 
-                height="16" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
                 strokeLinejoin="round"
                 style={{ display: 'block' }}
               >
-                <circle cx="11" cy="18" r="3"/>
-                <circle cx="18" cy="15" r="3"/>
-                <path d="M12.5 15.5 15 7"/>
-                <path d="M19.5 12.5 21 7"/>
-                <path d="M15 7h6.5l-4.5-4.5"/>
+                <circle cx="11" cy="18" r="3" />
+                <circle cx="18" cy="15" r="3" />
+                <path d="M12.5 15.5 15 7" />
+                <path d="M19.5 12.5 21 7" />
+                <path d="M15 7h6.5l-4.5-4.5" />
               </svg>
             </button>
           </div>
@@ -257,87 +257,68 @@ export function LogTab({
           <div style={{ opacity: isFetching ? 0.3 : 1, transition: 'opacity 0.2s ease', pointerEvents: isFetching ? 'none' : 'auto' }}>
             {commitsList.length > 0 && (
               <div style={{ position: 'absolute', top: `${actualTheadHeight}px`, left: 0, pointerEvents: 'none', zIndex: 5 }}>
-                <GitGraph 
-                  commits={commitsList} 
-                  rowHeight={actualRowHeight} 
+                <GitGraph
+                  commits={commitsList}
+                  rowHeight={actualRowHeight}
                   onWidthChange={setGraphWidth}
                   isLinear={!!fileFilter}
                 />
               </div>
             )}
             <table style={{ tableLayout: 'fixed', width: '100%' }}>
-            <thead ref={theadRef}>
-              <tr>
-                <th style={{ width: `${graphWidth}px` }}>Graph</th>
-                <th style={{ width: `${descWidth}px`, position: 'relative' }}>
-                  Description
-                  <div 
-                    className="resize-handle"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      startColumnResize('desc', e.clientX, descWidth);
-                    }}
-                  />
-                </th>
-                <th ref={authorHeaderRef} style={{ width: `${authorWidth}px`, position: 'relative' }}>
-                  <div 
-                    style={{ display: 'flex', alignItems: 'center', gap: '4px', paddingRight: '8px', boxSizing: 'border-box', height: '100%', width: '100%', overflow: 'hidden' }}
-                  >
-                    <div 
-                      onClick={() => setAuthorMenuOpen(prev => !prev)}
-                      style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', userSelect: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)' }}
-                      title="Filter by Author"
-                    >
-                      <span style={{ fontWeight: 'bold' }}>
-                        Author{filterAuthor !== 'ALL' ? `: ${filterAuthor}` : ''}
-                      </span>
-                      <span className="codicon codicon-chevron-down" style={{ fontSize: '10px', opacity: 0.8 }}></span>
-                    </div>
-                  </div>
-                  
-                  {authorMenuOpen && (
-                    <div 
-                      className="header-filter-popup"
-                      style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: '4px',
-                        zIndex: 1000,
-                        backgroundColor: 'var(--vscode-editorWidget-background, #252526)',
-                        color: 'var(--vscode-foreground, #cccccc)',
-                        border: '1px solid var(--vscode-editorWidget-border, var(--vscode-panel-border, #454545))',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-                        borderRadius: '4px',
-                        minWidth: '160px',
-                        maxWidth: '240px',
-                        maxHeight: '200px',
-                        overflowY: 'auto',
-                        padding: '4px 0',
-                        textAlign: 'left'
+              <thead ref={theadRef}>
+                <tr>
+                  <th style={{ width: `${graphWidth}px` }}>Graph</th>
+                  <th style={{ width: `${descWidth}px`, position: 'relative' }}>
+                    Description
+                    <div
+                      className="resize-handle"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        startColumnResize('desc', e.clientX, descWidth);
                       }}
+                    />
+                  </th>
+                  <th ref={authorHeaderRef} style={{ width: `${authorWidth}px`, position: 'relative' }}>
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px', paddingRight: '8px', boxSizing: 'border-box', height: '100%', width: '100%', overflow: 'hidden' }}
                     >
-                      <div 
-                        className={`header-filter-item ${filterAuthor === 'ALL' ? 'selected' : ''}`}
-                        onClick={() => handleSelectAuthor('ALL')}
+                      <div
+                        onClick={() => setAuthorMenuOpen(prev => !prev)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', userSelect: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 12px)' }}
+                        title="Filter by Author"
+                      >
+                        <span style={{ fontWeight: 'bold' }}>
+                          Author{filterAuthor !== 'ALL' ? `: ${filterAuthor}` : ''}
+                        </span>
+                        <span className="codicon codicon-chevron-down" style={{ fontSize: '10px', opacity: 0.8 }}></span>
+                      </div>
+                    </div>
+
+                    {authorMenuOpen && (
+                      <div
+                        className="header-filter-popup"
                         style={{
-                          padding: '4px 12px',
-                          cursor: 'pointer',
-                          fontSize: '11px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          userSelect: 'none'
+                          position: 'absolute',
+                          top: '100%',
+                          left: '4px',
+                          zIndex: 1000,
+                          backgroundColor: 'var(--vscode-editorWidget-background, #252526)',
+                          color: 'var(--vscode-foreground, #cccccc)',
+                          border: '1px solid var(--vscode-editorWidget-border, var(--vscode-panel-border, #454545))',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                          borderRadius: '4px',
+                          minWidth: '160px',
+                          maxWidth: '240px',
+                          maxHeight: '200px',
+                          overflowY: 'auto',
+                          padding: '4px 0',
+                          textAlign: 'left'
                         }}
                       >
-                        <span>All</span>
-                        {filterAuthor === 'ALL' && <span className="codicon codicon-check" style={{ fontSize: '10px' }}></span>}
-                      </div>
-                      <div className="context-menu-separator" style={{ margin: '4px 0', height: '1px', backgroundColor: 'var(--vscode-panel-border, #454545)', opacity: 0.4 }} />
-                      {gitData?.authors?.map((author) => (
-                        <div 
-                          key={author}
-                          className={`header-filter-item ${filterAuthor === author ? 'selected' : ''}`}
-                          onClick={() => handleSelectAuthor(author)}
+                        <div
+                          className={`header-filter-item ${filterAuthor === 'ALL' ? 'selected' : ''}`}
+                          onClick={() => handleSelectAuthor('ALL')}
                           style={{
                             padding: '4px 12px',
                             cursor: 'pointer',
@@ -345,75 +326,94 @@ export function LogTab({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            userSelect: 'none',
-                            textOverflow: 'ellipsis',
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap'
+                            userSelect: 'none'
                           }}
                         >
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{author}</span>
-                          {filterAuthor === author && <span className="codicon codicon-check" style={{ fontSize: '10px' }}></span>}
+                          <span>All</span>
+                          {filterAuthor === 'ALL' && <span className="codicon codicon-check" style={{ fontSize: '10px' }}></span>}
                         </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div 
-                    className="resize-handle"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      startColumnResize('author', e.clientX, authorWidth);
-                    }}
-                  />
-                </th>
-                <th style={{ width: `${dateWidth}px`, position: 'relative' }}>
-                  Date
-                  <div 
-                    className="resize-handle"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      startColumnResize('date', e.clientX, dateWidth);
-                    }}
-                  />
-                </th>
-                <th style={{ width: 'auto', borderRight: 'none' }}></th>
-              </tr>
-            </thead>
-            <tbody ref={tbodyRef}>
-              {commitsList.map((commit: Commit, idx: number) => (
-                <tr 
-                  key={commit.hash} 
-                  className={selection.selectedIndices.includes(idx) ? 'selected' : ''}
-                  onClick={(e) => selection.handleSelectCommit(idx, commit.hash, e)}
-                  onMouseDown={(e) => { if (e.shiftKey) e.preventDefault(); }}
-                  onContextMenu={(e) => selection.handleRowContextMenu(e, commit, idx, openContextMenu)}
-                  onMouseEnter={(e) => handleRowMouseEnter(e, commit)}
-                  onMouseMove={handleRowMouseMove}
-                  onMouseLeave={handleRowMouseLeave}
-                >
-                  <td style={{ width: `${graphWidth}px` }}></td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
-                      <div style={{ display: 'flex', flexWrap: 'nowrap', marginRight: '8px', flexShrink: 0 }}>
-                        {renderRefs(commit.refs)}
+                        <div className="context-menu-separator" style={{ margin: '4px 0', height: '1px', backgroundColor: 'var(--vscode-panel-border, #454545)', opacity: 0.4 }} />
+                        {gitData?.authors?.map((author) => (
+                          <div
+                            key={author}
+                            className={`header-filter-item ${filterAuthor === author ? 'selected' : ''}`}
+                            onClick={() => handleSelectAuthor(author)}
+                            style={{
+                              padding: '4px 12px',
+                              cursor: 'pointer',
+                              fontSize: '11px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              userSelect: 'none',
+                              textOverflow: 'ellipsis',
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{author}</span>
+                            {filterAuthor === author && <span className="codicon codicon-check" style={{ fontSize: '10px' }}></span>}
+                          </div>
+                        ))}
                       </div>
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{commit.message.split('\n')[0]}</span>
-                    </div>
-                  </td>
-                  <td>
-                    {commit.author_name}
-                    {gitData?.currentUser && (gitData.currentUser.name === commit.author_name || gitData.currentUser.email === commit.author_email) && (
-                      <span style={{ marginLeft: '4px', opacity: 0.6, fontSize: '10px', fontStyle: 'italic' }} title="Me">
-                        (me)
-                      </span>
                     )}
-                  </td>
-                  <td>{formatDate(commit.date, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
-                  <td style={{ borderRight: 'none' }}></td>
+
+                    <div
+                      className="resize-handle"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        startColumnResize('author', e.clientX, authorWidth);
+                      }}
+                    />
+                  </th>
+                  <th style={{ width: `${dateWidth}px`, position: 'relative' }}>
+                    Date
+                    <div
+                      className="resize-handle"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        startColumnResize('date', e.clientX, dateWidth);
+                      }}
+                    />
+                  </th>
+                  <th style={{ width: 'auto', borderRight: 'none' }}></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody ref={tbodyRef}>
+                {commitsList.map((commit: Commit, idx: number) => (
+                  <tr
+                    key={commit.hash}
+                    className={selection.selectedIndices.includes(idx) ? 'selected' : ''}
+                    onClick={(e) => selection.handleSelectCommit(idx, commit.hash, e)}
+                    onMouseDown={(e) => { if (e.shiftKey) e.preventDefault(); }}
+                    onContextMenu={(e) => selection.handleRowContextMenu(e, commit, idx, openContextMenu)}
+                    onMouseEnter={(e) => handleRowMouseEnter(e, commit)}
+                    onMouseMove={handleRowMouseMove}
+                    onMouseLeave={handleRowMouseLeave}
+                  >
+                    <td style={{ width: `${graphWidth}px` }}></td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                        <div style={{ display: 'flex', flexWrap: 'nowrap', marginRight: '8px', flexShrink: 0 }}>
+                          {renderRefs(commit.refs)}
+                        </div>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{commit.message.split('\n')[0]}</span>
+                      </div>
+                    </td>
+                    <td>
+                      {commit.author_name}
+                      {gitData?.currentUser && (gitData.currentUser.name === commit.author_name || gitData.currentUser.email === commit.author_email) && (
+                        <span style={{ marginLeft: '4px', opacity: 0.6, fontSize: '10px', fontStyle: 'italic' }} title="Me">
+                          (me)
+                        </span>
+                      )}
+                    </td>
+                    <td>{formatDate(commit.date, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                    <td style={{ borderRight: 'none' }}></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
           {isFetchingMore && (
             <div className="loading-row">
@@ -423,7 +423,7 @@ export function LogTab({
           )}
         </div>
       </div>
-      
+
       {selection.selectedIndex >= 0 && (
         <CommitDetailsSidePane
           commit={selectedCommit ?? null}

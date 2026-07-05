@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileTree } from './FileTree';
 import { Commit } from './types';
 import { formatDate } from './utils';
@@ -30,8 +30,44 @@ export function CommitDetailsSidePane({
   onToggleDetails,
   renderRefs,
 }: CommitDetailsSidePaneProps) {
+  const [width, setWidth] = useState(() => {
+    const saved = localStorage.getItem('git-constellation-sidepane-width');
+    return saved ? parseInt(saved, 10) : 300;
+  });
+  const [resizing, setResizing] = useState<{ startX: number; startWidth: number } | null>(null);
+
+  useEffect(() => {
+    if (!resizing) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = resizing.startX - e.clientX;
+      const newWidth = Math.max(200, Math.min(window.innerWidth - 100, resizing.startWidth + deltaX));
+      setWidth(newWidth);
+    };
+    const handleMouseUp = (e: MouseEvent) => {
+      const deltaX = resizing.startX - e.clientX;
+      const newWidth = Math.max(200, Math.min(window.innerWidth - 100, resizing.startWidth + deltaX));
+      localStorage.setItem('git-constellation-sidepane-width', String(newWidth));
+      setResizing(null);
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.body.classList.add('resizing');
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.classList.remove('resizing');
+    };
+  }, [resizing]);
+
   return (
-    <div className="side-pane">
+    <div className="side-pane" style={{ width: `${width}px`, position: 'relative' }}>
+      <div
+        className="resize-handle-left"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          setResizing({ startX: e.clientX, startWidth: width });
+        }}
+      />
       <div className="side-pane-title-bar">
         <span>Commit Details</span>
         <span 
