@@ -2,7 +2,7 @@
   "name": "vscode-git-constellation",
   "displayName": "GitConstellation",
   "description": "JetBrains-style Git visualization for VS Code",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "publisher": "flybugxyz",
   "icon": "icon.png",
   "repository": {
